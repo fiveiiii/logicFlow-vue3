@@ -1,0 +1,11 @@
+
+:deep(.el-collapse-item__header) {
+	font-size: 14px;
+	font-weight: bold;
+}
+.panel {
+	box-sizing: border-box;
+	height: calc(100vh - 155px);
+	padding: 8px 14px;
+	overflow: auto;
+}
