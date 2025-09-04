@@ -28,15 +28,15 @@ LogicFlow.use(MiniMap);
 LogicFlow.use(Control);
 LogicFlow.use(SelectionSelect);
 
-// const { runAsync: fetchLists } = usePost("GET", "/les/v1/api/componentRegister/list");
+// const { runAsync: fetchLists } = usePost("GET", "/v1/api/list");
 // // 获取EL表达式
-// const { runAsync: fetchElStr, loading: btnLoading } = usePost("POST", "/wms/v1/api/chain/getElStr");
+// const { runAsync: fetchElStr, loading: btnLoading } = usePost("POST", "/v1/api/getElStr");
 // // 保存
-// const { runAsync: fetchSaveChain, loading } = usePost("POST", "/wms/v1/api/chain/saveChain");
+// const { runAsync: fetchSaveChain, loading } = usePost("POST", "/v1/api/saveChain");
 // // 获取流程详情
-// const { runAsync: fetchFlowChain, loading: pageLoading } = usePost("POST", "/wms/v1/api/chain/getFlowChain");
+// const { runAsync: fetchFlowChain, loading: pageLoading } = usePost("POST", "/v1/api/getFlowChain");
 // // 全局配置数据
-// const { runAsync: fetchDtail } = usePost("POST", "/v1/metadata/business/detail");
+// const { runAsync: fetchDtail } = usePost("POST", "/v1/api/detail");
 
 // 容器
 const container = ref<HTMLElement | null>(null);

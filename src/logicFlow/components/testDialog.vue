@@ -7,9 +7,9 @@ import { randomHex10 } from "../utils";
 // import { http } from "@/hooks";
 
 const props = defineProps(["lf", "globalFormData"]);
-// const { runAsync: fetchElStr, loading: btnLoading } = usePost("POST", "/wms/v1/api/chain/getElStr");
+// const { runAsync: fetchElStr, loading: btnLoading } = usePost("POST", "/v1/api/getElStr");
 
-// const { runAsync: fetchDtail } = usePost("POST", "/v1/metadata/business/query");
+// const { runAsync: fetchDtail } = usePost("POST", "/v1/business/query");
 
 const testDialog = defineModel<boolean>();
 const innerVisible = ref(false);
@@ -49,7 +49,7 @@ const onTest = async () => {
 		params[item.param_name] = item.param_value;
 	});
 	if (!props.globalFormData.chain_cd) return;
-	const { ok, data }: any = await http.post(`/wms/v1/api/chain/mockTest/${props.globalFormData.chain_cd}`, params);
+	const { ok, data }: any = await http.post(`/v1/api/mockTest`, params);
 	if (!ok) return;
 	resultTableData.value = data.executeStepList || [];
 	resultForm.value.stepStr = data.stepStr || "";
