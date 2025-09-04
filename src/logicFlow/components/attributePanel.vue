@@ -11,7 +11,8 @@ defineExpose({
 });
 const isShow = computed(() => {
 	const attributeProps = Object.keys(props.attributeProps);
-	if (attributeProps.length) {
+	const edgeProps = Object.keys(props.edgeProps);
+	if (attributeProps.length || edgeProps.length) {
 		return true;
 	}
 	return false;

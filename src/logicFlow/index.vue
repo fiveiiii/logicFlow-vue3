@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, reactive, useTemplateRef, computed, nextTick } from "vue";
-
+// import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Document, View, CircleClose, Pointer } from "@element-plus/icons-vue";
 import AttributePanel from "./components/attributePanel.vue";
@@ -8,19 +8,25 @@ import TestDialog from "./components/testDialog.vue";
 
 import LogicFlow from "@logicflow/core";
 import "@logicflow/core/lib/style/index.css";
-import { Menu, MiniMap } from "@logicflow/extension";
+import { Menu, MiniMap, SelectionSelect, Control, DynamicGroup } from "@logicflow/extension";
 import "@logicflow/extension/lib/style/index.css";
 // logicflow 拓展属性
-import { pluginsOptions } from "./extension";
+import { pluginsOptions, config, controlAddItem, setlFTheme } from "./extension";
 import registerNode from "./nodes";
 
 // import usePost from "@/hooks/usePost";
-import { defaultProperties, ComponentType, Properties, ClickType, PanelType } from "./constants";
+import { defaultProperties, ComponentType, type Properties, type ClickType, type PanelType } from "./constants";
 import { hasEmptyValues } from "./utils";
 
+// const router = useRouter();
+// const route = useRoute();
+
+// const id = computed(() => route.query.id);
 // 加载插件
 LogicFlow.use(Menu);
 LogicFlow.use(MiniMap);
+LogicFlow.use(Control);
+LogicFlow.use(SelectionSelect);
 
 // const { runAsync: fetchLists } = usePost("GET", "/les/v1/api/componentRegister/list");
 // // 获取EL表达式
@@ -54,6 +60,11 @@ const Basic = [
 	{ name: "普通组件", type: "COMMON", properties: { ...defaultProperties, cmpType: "common" } },
 	{ name: "选择组件", type: "SWITCH", properties: { ...defaultProperties, cmpType: "switch" } },
 	{ name: "布尔组件", type: "IF", properties: { ...defaultProperties, cmpType: "boolean" } },
+	{
+		name: "分组组件",
+		type: "GROUP",
+		properties: { ...defaultProperties, cmpType: "group", languageType: "" },
+	},
 ];
 
 const dragForm = reactive({
@@ -74,18 +85,21 @@ onMounted(() => {
 		if (container.value) {
 			// 初始化实例
 			lf = new LogicFlow({
+				...config,
 				container: container.value,
 				grid: true,
-				plugins: [MiniMap],
+				plugins: [MiniMap, SelectionSelect, DynamicGroup],
 				pluginsOptions,
 				// 其他配置
 			});
 			try {
 				await getFlowChain();
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 			}
 			registerNode(lf);
+			controlAddItem(lf);
+			setlFTheme(lf);
 			lf.render(flowData.value);
 			// 定义导出数据转换函数
 			lf.adapterOut = (data) => {
@@ -128,6 +142,10 @@ onMounted(() => {
 
 			//线点击事件
 			lf.on("edge:click", ({ data }) => {
+				for (const key in edgeProps) {
+					delete edgeProps[key];
+				}
+
 				Object.assign(edgeProps, data);
 				if (!edgeProps.text) {
 					edgeProps.text = { value: "" };
@@ -176,7 +194,9 @@ const previewEl = async () => {
 		ElMessage.success(data);
 	}
 };
-
+const onBack = () => {
+	router.go(-1);
+};
 const onTest = () => {
 	const currentData = JSON.stringify(lf.getGraphRawData());
 	const initData = JSON.stringify(flowData.value);
@@ -205,7 +225,7 @@ const onSave = async (isBack: boolean = true) => {
 	const flag = hasEmptyValues(verifyData.nodes);
 	if (!flag) return;
 
-	const { ok } = await fetchSaveChain({ chainFlow: JSON.stringify(data), id: 1 });
+	const { ok } = await fetchSaveChain({ chainFlow: JSON.stringify(data), id: id.value });
 	if (ok) {
 		ElMessage.success("保存成功!");
 		isBack && onBack();
@@ -257,7 +277,6 @@ const getDtail = async () => {
 // 获取全局组件数据
 getDtail();
 initComponets();
-const onBack = () => {};
 onUnmounted(() => {
 	// 销毁lf
 	lf.destroy();
@@ -265,12 +284,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="flowHome" v-loading="false">
+	<div class="flowHome" v-loading="pageLoading || loading">
 		<div class="control">
 			<el-button type="primary" :icon="CircleClose" @click="onBack">返回</el-button>
 			<el-button type="primary" :icon="Document" @click="onSave">保存</el-button>
 			<el-button type="primary" :icon="Pointer" @click="onTest">模拟测试</el-button>
-			<el-button :icon="View" @click="previewEl" :loading="false">查看逻辑流模型</el-button>
+			<el-button :icon="View" @click="previewEl" :loading="btnLoading">查看逻辑流模型</el-button>
 		</div>
 		<div class="flowContainer">
 			<!-- 拖拽面板 -->
@@ -285,6 +304,7 @@ onUnmounted(() => {
 							:class="{
 								'base-node': comp.type === 'Basic',
 								'business-node': comp.type === 'Business',
+								'group-node': comp.type === 'GROUP',
 								[item.properties.cmpType + '-node']: true,
 							}"
 							@mousedown="startDrag(item)"
@@ -389,5 +409,15 @@ onUnmounted(() => {
 .switch-node {
 	background-color: #e6fff7 !important;
 	border: 1px solid #13c2c2 !important;
+}
+.group-node {
+	background-color: #1890ff1a;
+	border: 1px solid #1890ff;
+}
+
+:deep {
+	.custom-select {
+		background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAH6ji2bAAAABGdBTUEAALGPC/xhBQAAAOVJREFUOBGtVMENwzAIjKP++2026ETdpv10iy7WFbqFyyW6GBywLCv5gI+Dw2Bluj1znuSjhb99Gkn6QILDY2imo60p8nsnc9bEo3+QJ+AKHfMdZHnl78wyTnyHZD53Zzx73MRSgYvnqgCUHj6gwdck7Zsp1VOrz0Uz8NbKunzAW+Gu4fYW28bUYutYlzSa7B84Fh7d1kjLwhcSdYAYrdkMQVpsBr5XgDGuXwQfQr0y9zwLda+DUYXLaGKdd2ZTtvbolaO87pdo24hP7ov16N0zArH1ur3iwJpXxm+v7oAJNR4JEP8DoAuSFEkYH7cAAAAASUVORK5CYII=");
+	}
 }
 </style>

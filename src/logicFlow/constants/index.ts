@@ -4,7 +4,8 @@ export enum ComponentType {
 	common = "COMMON",
 	script = "COMMON",
 	switch_script = "SWITCH",
-	boolean_script = "IF"
+	boolean_script = "IF",
+	group = "GROUP"
 }
 export type ClickType = "node" | "edge";
 
@@ -20,6 +21,8 @@ export interface Properties {
 	inParamList: any[];
 	outParamList: any[];
 	isDisable: boolean;
+	basic: boolean; // 	基础组件
+	extendType: string; // 分组拓展的类型字段
 }
 
 // 语言类型
@@ -46,15 +49,19 @@ export const defaultProperties: Properties = {
 	cmpCd: "",
 	cmpType: "",
 	cmpModel: "",
-	languageType: "Java",
+	languageType: "java",
 	remark: "",
 	inParamList: [],
 	outParamList: [],
-	isDisable: false
+	isDisable: false,
+	basic: true,
+	extendType: "GROUP"
 };
 
 // 要校验的字段列表
 export const fieldsToCheck: (keyof Properties)[] = ["cmpNm", "cmpCd", "cmpType", "cmpModel", "languageType"];
+// group 校验
+export const groupFields = ["cmpCd", "cmpNm", "cmpType", "extendType"];
 
 export const MonacoEditorConfig = {
 	language: "java",

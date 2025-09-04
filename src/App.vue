@@ -8,7 +8,12 @@ import LogicFlow from "./logicFlow/index.vue";
 	</div>
 </template>
 
-<style scoped>
+<style>
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
 .flow {
 	height: calc(100vh - 50px);
 	overflow: hidden;

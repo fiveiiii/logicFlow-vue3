@@ -1,4 +1,4 @@
-import { fieldsToCheck, type Properties } from "../constants";
+import { fieldsToCheck, type Properties, groupFields } from "../constants";
 import { ElMessage } from "element-plus";
 export function randomHex10() {
 	return Array.from({ length: 10 }, () => {
@@ -13,13 +13,15 @@ export function randomHex10() {
  */
 export function hasEmptyValues(components: Properties[]): boolean {
 	for (const comp of components) {
+		const fields = comp.cmpType === "group" ? groupFields : fieldsToCheck;
 		const isDisabled = comp.isDisable === true;
 		if (isDisabled) {
 			// 如果 isDisable=true，跳过校验
 			continue;
 		}
+
 		// 只校验 isDisable=false 的组件
-		for (const field of fieldsToCheck) {
+		for (const field of fields) {
 			const value = comp[field];
 			// 判断是否为空：空字符串、null、undefined
 			if (!value) {

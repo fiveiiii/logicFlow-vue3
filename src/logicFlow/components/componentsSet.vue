@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { languageType, Properties, MonacoEditorConfig } from "../constants";
+import { computed, ref } from "vue";
+import { languageType, type Properties, MonacoEditorConfig } from "../constants";
 import { Document } from "@element-plus/icons-vue";
 import MonacoEditor from "@/components/MonacoEditor/index.vue";
 
@@ -33,6 +33,11 @@ const changeScriptDialog = (val) => {
 	}
 	scriptDialog.value = val;
 };
+
+const isShow = computed(() => {
+	const show = ["group"].includes(props.attributeProps.cmpType);
+	return !show;
+});
 </script>
 
 <template>
@@ -55,7 +60,7 @@ const changeScriptDialog = (val) => {
 							@change="(val) => updateLfValue(val, 'cmpNm')"
 						/>
 					</el-form-item>
-					<el-form-item label="语言类型">
+					<el-form-item label="语言类型" v-if="isShow">
 						<el-select
 							placeholder="请选择语言类型"
 							v-model="props.attributeProps.languageType"
@@ -66,22 +71,29 @@ const changeScriptDialog = (val) => {
 						</el-select>
 					</el-form-item>
 
-					<el-form-item :label="props.attributeProps.languageType === 'Java' ? 'Bean名称' : '组件编码'">
+					<el-form-item :label="props.attributeProps.languageType === 'java' ? 'Bean名称' : '组件编码'">
 						<el-input
 							v-model="props.attributeProps.cmpCd"
 							:disabled="props.attributeProps.isDisable"
 							@change="(val) => updateLfValue(val, 'cmpCd')"
 						/>
 					</el-form-item>
-					<el-form-item :label="props.attributeProps.languageType === 'Java' ? 'Java类' : '脚本'">
+					<el-form-item :label="props.attributeProps.languageType === 'java' ? 'Java类' : '脚本'" v-if="isShow">
 						<el-input
 							v-model="props.attributeProps.cmpModel"
 							:disabled="props.attributeProps.isDisable"
-							v-if="props.attributeProps.languageType === 'Java'"
+							v-if="props.attributeProps.languageType === 'java'"
 							placeholder="请输入Java类"
 							@change="(val) => updateLfValue(val, 'cmpModel')"
 						/>
 						<el-button type="primary" :icon="Document" v-else @click="changeScriptDialog(true)">脚本</el-button>
+					</el-form-item>
+					<el-form-item label="组件类型" v-if="!isShow">
+						<el-input
+							v-model="props.attributeProps.extendType"
+							:disabled="props.attributeProps.isDisable"
+							@change="(val) => updateLfValue(val, 'extendType')"
+						/>
 					</el-form-item>
 					<el-form-item label="备注">
 						<el-input
@@ -94,7 +106,7 @@ const changeScriptDialog = (val) => {
 					</el-form-item>
 				</el-form>
 			</el-collapse-item>
-			<el-collapse-item title="出参入参" name="2">
+			<el-collapse-item title="出参入参" name="2" v-if="!props.attributeProps.basic">
 				<div class="text-[14px] text-center py-3">入参变量</div>
 				<el-table :data="props.attributeProps.inParamList" style="width: 100%" border>
 					<el-table-column prop="paramDesc" label="字段描述" show-overflow-tooltip />
